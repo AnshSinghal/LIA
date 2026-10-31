@@ -25,6 +25,7 @@ export default function App() {
   const [matches, setMatches] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [questionsOpen, setQuestionsOpen] = useState(false);
   const threadRef = useRef(null);
   const starters = groups.slice(0, 3).flatMap((group) => group.questions.slice(0, 1));
 
@@ -69,6 +70,7 @@ export default function App() {
   async function ask(text, templateId = null, page = 1) {
     const trimmed = text.trim();
     if (!trimmed || busy) return;
+    setQuestionsOpen(false);
     setBusy(true);
     setError("");
     try {
@@ -191,7 +193,10 @@ export default function App() {
     <>
       <a className="skip" href="#conversation">Skip to conversation</a>
       <div className="shell">
-        <aside className="rail">
+        {questionsOpen && (
+          <button type="button" className="backdrop" aria-label="Close questions" onClick={() => setQuestionsOpen(false)} />
+        )}
+        <aside className={questionsOpen ? "rail open" : "rail"} id="questions">
           <div className="mark">
             <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true">
               <rect width="36" height="36" rx="8" fill="#1E40AF" />
@@ -242,7 +247,16 @@ export default function App() {
         </aside>
         <section className="stage">
           <header className="stage-bar">
-            <div>
+            <button
+              type="button"
+              className="menu-toggle"
+              aria-expanded={questionsOpen}
+              aria-controls="questions"
+              onClick={() => setQuestionsOpen((open) => !open)}
+            >
+              {questionsOpen ? "Close" : "Questions"}
+            </button>
+            <div className="titles">
               <h1>Ask the week</h1>
               <p>Faculty load, rooms, and the timetable. Known questions stay exact.</p>
             </div>
